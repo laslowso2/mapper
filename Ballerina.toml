@@ -1,0 +1,4 @@
+[package]
+org = "laslopastor"
+name = "mrfmapper"
+version = "0.1.0"

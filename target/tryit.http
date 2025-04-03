@@ -1,0 +1,26 @@
+/*
+### Try Service: 'convert' (http://localhost:9090/convert)
+
+*/
+
+/*
+#### GET /greeting
+
+*/
+###
+GET http://localhost:9090/convert/greeting
+
+/*
+#### POST /mrf
+
+*/
+###
+POST http://localhost:9090/convert/mrf
+Content-Type: application/json
+
+# Modify the JSON payload as needed
+#
+# Expected schema:
+# object
+{}
+
