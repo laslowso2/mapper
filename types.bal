@@ -1,7 +1,7 @@
 
 type Providers record {|
     decimal billed_charge;
-    string[] npi;
+    int[] npi;
 |};
 
 type Payments record {|
@@ -23,7 +23,7 @@ type AllowedAmounts record {|
 
 
 type OutOfNetwork record {|
-   string name;
+    string name;
     string billing_code_type;
     string billing_code_type_version;
     string billing_code;

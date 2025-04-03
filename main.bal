@@ -14,23 +14,25 @@ service /convert on httpDefaultListener {
 
     resource function post mrf(@http:Payload json input) returns error|string {
         do {
+            if input is json {
+                // Check if the input JSON is empty
+                if input.toString().trim() == "{}" {
+                    return error("Input JSON is empty");
+                }
+            }
+           
+        MRFBase parsedJson =check input.cloneWithType();
 
- json mrf = <json>input;
-        //r4:Bundle fhirBundle = check fhirParser:parse(mrf).ensureType();    
-
-
-        //MRFBase|error parsedJson = input.cloneWithType(MRFBase);
-
-        //if mrf is MRFBase {
-        string csvData = "Billing Code, Billing Type, Provider NPI, Billed Charge, Allowed Amount, Billing Class, TIN Value\n"; // CSV Header
+        if parsedJson is MRFBase {
+        string csvData = "TIN Value, Provider NPI, Billing Class, Billing Code, Billing Type, Billed Charge, Allowed Amount, Description, Name      \n"; // CSV Header
 
             // Iterate over OutOfNetwork records
-            foreach var billingCode in mrf.out_of_network {
-                string billingCodeValue = billingCode.billing_code;
-                string billingType = billingCode.billing_code_type;
+            foreach var oon in parsedJson.out_of_network {
+                string billingCodeValue = oon.billing_code;
+                string billingType = oon.billing_code_type;
 
                 // Iterate over allowed amounts
-                foreach var allowedAmount in billingCode.allowed_amounts {
+                foreach var allowedAmount in oon.allowed_amounts {
                     string tinValue = allowedAmount.tin.value;
                     string billingClass = allowedAmount.billing_class;
 
@@ -40,18 +42,15 @@ service /convert on httpDefaultListener {
 
                         // Iterate over providers
                         foreach var provider in payment.providers {
-                            string npis = provider.npi.join(","); // Join multiple NPIs with a comma
-                            csvData += string `${billingCodeValue}, ${billingType}, ${npis}, ${provider.billed_charge}, ${allowedAmt}, ${billingClass}, ${tinValue}\n`;
+                            string npis = provider.npi.toString(); // Join multiple NPIs with a comma
+                            csvData += string `${tinValue}, ${npis}, ${billingClass}, ${billingCodeValue}, ${billingType}, ${provider.billed_charge}, ${allowedAmt}, ${oon.description}, ${oon.name}    ` + "\n";
                         }
                     }
                 }
                 
             }
-
             return csvData; // Return CSV as response
-       // } else {
-       //     return error("Invalid JSON format. Expected MRFBase structure.");
-       // }
+        }
         } on fail error err {
             // handle error
             return error("Not implemented", err);
